@@ -1,0 +1,20 @@
+[run]
+include = secure_channel/*
+omit = *migrations*
+
+[report]
+fail_under = 100
+precision = 2
+skip_covered = true
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise NotImplementedError
+
+    pass
+
+    # Ignore lines that returns. This is so we don't need to test
+    # properties methods that just return.
+    ^\s*return\s*[\sa-zA-Z\(\)\.\d]*\s*$

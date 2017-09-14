@@ -1,0 +1,14 @@
+-r base.txt
+pytest
+pytest-cov
+
+pylint
+pylint-common
+pyenchant
+
+pip-tools
+invoke
+
+pep8
+
+bumpversion
