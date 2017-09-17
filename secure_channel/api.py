@@ -4,17 +4,39 @@ import enum
 import typing
 
 
-DataBuffer = typing.Union[bytes, bytearray, memoryview]
+DataBuffer = typing.Union[bytearray, memoryview]
 
 
 ExtendedKeys = typing.NamedTuple(
   "ExtendedKeys",
   (
-    ("send_encryption_key", bytes),
-    ("recv_encryption_key", bytes),
-    ("send_sign_key", bytes),
-    ("recv_sign_key", bytes),
+    ("send_encryption_key", bytearray),
+    ("recv_encryption_key", bytearray),
+    ("send_sign_key", bytearray),
+    ("recv_sign_key", bytearray),
   )
+)
+
+
+ChannelConfiguration = typing.NamedTuple(
+  "ChannelConfiguration",
+  (
+    # Maximal size of message
+    ("max_message_size_bytes", int),
+    # Maximal number of messages in session
+    ("max_messages_in_session", int )
+  )
+)
+
+
+DEFAULT_CONFIGURATION = ChannelConfiguration(
+  # We limit max message size to 256 mb, as messages are stored in memory twice.
+  # They need to be stored in memory due to requirement of releasing plaintext
+  # out of encryption function only after plaintext is verified.
+  # I could store messages on disk, but hey it's a toy project
+  max_message_size_bytes=268435456,
+  # Full 32 byte counter
+  max_messages_in_session=4294967296-1,
 )
 
 
@@ -27,15 +49,47 @@ class CommunicationSide(enum.Enum):
   BOB = 2
 
 
+class Message(object, metaclass=abc.ABCMeta):
+
+  def __init__(self, message_id: int, data: DataBuffer):
+    self.message_id = message_id
+    self.data = data
+
+
 class DataSource(object, metaclass=abc.ABCMeta):
 
+  """
+  Implements a two-way data source.
+  """
+
+  def __init__(self, config: ChannelConfiguration) -> None:
+    super().__init__()
+    self.__config = config
+
+  @property
+  def config(self):
+    return self.__config
+
+
   @abc.abstractmethod
-  def write(self, data: DataBuffer):
+  def write(self, message: Message):
+    """
+    Write data to the underlying stream.
+
+    This call is blocking. It will either write whole buffer or raise an exception.
+    """
     raise NotImplemented()
 
   @abc.abstractmethod
-  def read(self, read_into: DataBuffer, blocking: bool= True):
-    raise NotImplementedError
+  def read(self) -> Message:
+    """
+    Read data from underlying stream.
+
+    This function has two modes: blocking and non-blocking.
+
+    :return: number of bytes read. This is always a multiple of self.block_size
+    """
+    raise NotImplemented()
 
 
 class InitialKeyNegotiator(object):
@@ -45,7 +99,7 @@ class InitialKeyNegotiator(object):
 
   @abc.abstractmethod
   def create_session_key(self) -> bytes:
-    raise NotImplementedError
+    raise NotImplemented()
 
 
 class KeyExtensionFunction(object):

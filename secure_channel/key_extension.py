@@ -2,6 +2,9 @@
 from Crypto.Hash import SHA256
 
 from .api import ExtendedKeys, KeyExtensionFunction
+from .utils import clear_buffer
+
+
 
 
 class DefaultKeyExtensionFunction(KeyExtensionFunction):
@@ -23,7 +26,7 @@ class DefaultKeyExtensionFunction(KeyExtensionFunction):
     hash_obj = SHA256.new()
     hash_obj.update(message)
     hash_obj.update(self.session_key)
-    return hash_obj.digest()
+    return bytearray(hash_obj.digest())
 
   def extend_keys(self) -> ExtendedKeys:
     extended_keys = ExtendedKeys(

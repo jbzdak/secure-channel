@@ -62,6 +62,6 @@ def test_different_session_keys_generate_different_extended_keys(alice_keys, ali
   # This one works as follows, extended keys are a named tuple, which is a tuple
   # so we add both of these tuples to a set, and check if there are duplicates.
   raw_keys = set()
-  raw_keys.update(alice_keys)
-  raw_keys.update(alice_alternate_keys)
+  raw_keys.update([bytes(k) for k in alice_keys])
+  raw_keys.update([bytes(k) for k in alice_alternate_keys])
   assert len(raw_keys) == 8
