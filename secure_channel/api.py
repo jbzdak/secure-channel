@@ -1,6 +1,7 @@
 
 import abc
 import enum
+import threading
 import typing
 
 
@@ -24,7 +25,8 @@ ChannelConfiguration = typing.NamedTuple(
     # Maximal size of message
     ("max_message_size_bytes", int),
     # Maximal number of messages in session
-    ("max_messages_in_session", int )
+    ("max_messages_in_session", int),
+    ("session_key_length_bytes", int),
   )
 )
 
@@ -37,7 +39,37 @@ DEFAULT_CONFIGURATION = ChannelConfiguration(
   max_message_size_bytes=268435456,
   # Full 32 byte counter
   max_messages_in_session=4294967296-1,
+  session_key_length_bytes=32
 )
+
+
+class ConfigurationAware(object):
+
+  def __init__(self, configuration: ChannelConfiguration):
+    self.__configuration = configuration
+
+  @property
+  def configuration(self):
+    return self.__configuration
+
+
+class SessionState(ConfigurationAware):
+
+  def get_send_message_number(self) -> int:
+    pass
+
+  def verify_recv_message_number(self, message_number: int):
+    pass
+
+  def get_extended_keys(self) -> ExtendedKeys:
+    pass
+
+  def reset(self):
+    pass
+
+
+
+
 
 
 class CommunicationSide(enum.Enum):
@@ -92,13 +124,10 @@ class DataSource(object, metaclass=abc.ABCMeta):
     raise NotImplemented()
 
 
-class InitialKeyNegotiator(object):
-
-  def __init__(self, source: DataSource, metaclass=abc.ABCMeta):
-    self.source = source
+class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
-  def create_session_key(self) -> bytes:
+  def create_session_key(self, source: DataSource) -> bytes:
     raise NotImplemented()
 
 
