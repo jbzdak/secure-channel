@@ -68,10 +68,6 @@ class SessionState(ConfigurationAware):
     pass
 
 
-
-
-
-
 class CommunicationSide(enum.Enum):
   """
   Represents side of communication, to establish secure channel one side **must** set this to ALICE and other to BOB.
@@ -127,7 +123,7 @@ class DataSource(object, metaclass=abc.ABCMeta):
 class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
-  def create_session_key(self, source: DataSource) -> bytes:
+  def create_session_key(self, source: DataSource) -> bytearray:
     raise NotImplemented()
 
 
