@@ -37,3 +37,9 @@ class NeedToRenegotiateKey(BaseException):
   """
   Thrown when you need to renegotiate key, due to using up all messages in session.
   """
+
+
+class InvalidSignature(BaseException):
+  """
+  A signature is invalid
+  """

@@ -19,7 +19,9 @@ def test_clear_buffer(random_buffer):
 
 
 def test_clear_keys(random_buffer):
-  keys = key_extension.DefaultKeyExtensionFunction(random_buffer, api.CommunicationSide.ALICE).extend_keys()
+  keys = key_extension.DefaultKeyExtensionFunction().extend_keys(
+    api.CommunicationSide.ALICE, random_buffer
+  )
   utils.destroy_key(keys)
   for key in keys:
     for elem in key:

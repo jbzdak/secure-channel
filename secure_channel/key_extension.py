@@ -1,7 +1,8 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.hashes import SHA256
+from cryptography.hazmat.primitives.hashes import Hash
 
-from Crypto.Hash import SHA256
-
-from .api import ExtendedKeys, KeyExtensionFunction
+from .api import ExtendedKeys, KeyExtensionFunction, CommunicationSide, DataBuffer
 from .utils import clear_buffer
 
 
@@ -14,25 +15,27 @@ class DefaultKeyExtensionFunction(KeyExtensionFunction):
   for each direction and sign/encrypt.
   """
 
-  @classmethod
-  def encrypt_key_size(cls) -> int:
-    return 32
+  def do_hash(self, session_key: DataBuffer, message: bytes):
+    hash_obj = Hash(SHA256(), default_backend())
+    # TODO: In the book these two were in different order
+    # thing about it.
+    hash_obj.update(bytes(message))
+    hash_obj.update(bytes(session_key))
+    return bytearray(hash_obj.finalize())
 
-  @classmethod
-  def sign_key_size(cls) -> int:
-    return 32
-
-  def do_hash(self, message: bytes):
-    hash_obj = SHA256.new()
-    hash_obj.update(message)
-    hash_obj.update(self.session_key)
-    return bytearray(hash_obj.digest())
-
-  def extend_keys(self) -> ExtendedKeys:
+  def extend_keys(
+      self,
+      side: CommunicationSide,
+      session_key: bytearray
+  ) -> ExtendedKeys:
     extended_keys = ExtendedKeys(
-      send_encryption_key=self.do_hash(b'Encrypt Alice to Bob'),
-      recv_encryption_key=self.do_hash(b'Encrypt Bob to Alice'),
-      send_sign_key=self.do_hash(b'Sign Alice to Bob'),
-      recv_sign_key=self.do_hash(b'sign Bob to Alice'),
+      send_encryption_key=self.do_hash(session_key, b'Encrypt Alice to Bob'),
+      recv_encryption_key=self.do_hash(session_key, b'Encrypt Bob to Alice'),
+      send_sign_key=self.do_hash(session_key, b'Sign Alice to Bob'),
+      # TODO: Fix first letter should be uppercase
+      # but this will break tests
+      recv_sign_key=self.do_hash(session_key, b'sign Bob to Alice'),
     )
-    return self._swap_keys_for_bob(extended_keys)
+    return self._swap_keys_for_bob(side, extended_keys)
+
+

@@ -4,6 +4,8 @@ import enum
 import threading
 import typing
 
+from cryptography.hazmat.primitives.hashes import HashAlgorithm
+from cryptography.hazmat.primitives.ciphers.algorithms import CipherAlgorithm
 
 DataBuffer = typing.Union[bytearray, memoryview]
 
@@ -19,6 +21,21 @@ ExtendedKeys = typing.NamedTuple(
 )
 
 
+ChannelCryptoConfiguration = typing.NamedTuple(
+  "ChannelCryptoConfiguration",
+  (
+    # Right now protocol version will be identified by single
+    # 32 bit int. If you touch anything beloow
+    ("protocol_version", int),
+    ("session_key_length_bytes", int),
+    ("block_cipher", CipherAlgorithm),
+    ("hash_algo", HashAlgorithm),
+  )
+)
+"""
+This is crypto configuration, please don't touch it. 
+"""
+
 ChannelConfiguration = typing.NamedTuple(
   "ChannelConfiguration",
   (
@@ -26,10 +43,12 @@ ChannelConfiguration = typing.NamedTuple(
     ("max_message_size_bytes", int),
     # Maximal number of messages in session
     ("max_messages_in_session", int),
-    ("session_key_length_bytes", int),
   )
 )
-
+"""
+Things in this tuple may be changed by end user, and they 
+probably won't compromise security. 
+"""
 
 DEFAULT_CONFIGURATION = ChannelConfiguration(
   # We limit max message size to 256 mb, as messages are stored in memory twice.
@@ -38,9 +57,9 @@ DEFAULT_CONFIGURATION = ChannelConfiguration(
   # I could store messages on disk, but hey it's a toy project
   max_message_size_bytes=268435456,
   # Full 32 byte counter
-  max_messages_in_session=4294967296-1,
-  session_key_length_bytes=32
+  max_messages_in_session=4294967296-1, # TODO: Validte it fits in long
 )
+"""Feel free to change these."""
 
 
 class ConfigurationAware(object):
@@ -79,8 +98,9 @@ class CommunicationSide(enum.Enum):
 
 class Message(object, metaclass=abc.ABCMeta):
 
-  def __init__(self, message_id: int, data: DataBuffer):
+  def __init__(self, message_id: int, data: DataBuffer, protocol_version: int):
     self.message_id = message_id
+    self.protocol_version = protocol_version
     self.data = data
 
 
@@ -122,9 +142,26 @@ class DataSource(object, metaclass=abc.ABCMeta):
 
 class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
 
-  @abc.abstractmethod
-  def create_session_key(self, source: DataSource) -> bytearray:
-    raise NotImplemented()
+  def create_session_state(
+      self,
+      data_source: DataSource,
+      configuration: ChannelConfiguration
+  ) -> SessionState:
+    """
+    Key negotiator might need to influence Session state to
+    generate cryptographically sound system.
+
+    For example negotiator does not negotiate keys, but just
+    uses the same session key, storing message serial numbers on disk
+    (this makes sense if you *KNOW* your system will send less than
+    2^32-1 messages).
+
+    :param data_source: Data source that might be used to
+                        negotiate the key.
+    :param configuration: Channel configuration.
+
+    """
+    raise NotImplemented
 
 
 class KeyExtensionFunction(object):
@@ -132,33 +169,26 @@ class KeyExtensionFunction(object):
   """
   Object representing secure key extension function.
 
-  It takes a session key and communication side, and securely produces for keys for encryption and authentication.
+  It takes a session key and communication side,
+  and securely produces for keys for encryption and authentication.
+
+  It is not used explicitly through the api, however most of the
+  implementations of SessionState will use such generator
+  implicitly.
   """
 
-  @classmethod
-  @abc.abstractmethod
-  def sign_key_size(cls) -> int:
-    """Return size of the generated extended sign key in bytes"""
-    return NotImplemented
-
-  @classmethod
-  @abc.abstractmethod
-  def encrypt_key_size(cls) -> int:
-    """Return size of the generated extended encrypt key in bytes"""
-    return NotImplemented
-
-  def __init__(self, session_key: bytes, side: CommunicationSide):
-    self.session_key = session_key
-    self.side = side
-
-  def _swap_keys_for_bob(self, extended_keys: ExtendedKeys) -> ExtendedKeys:
+  def _swap_keys_for_bob(
+      self,
+      side: CommunicationSide,
+      extended_keys: ExtendedKeys,
+  ) -> ExtendedKeys:
     """
     Helper that swaps send and recv keys if side is bob. You need to call it in your implementation of
     KeyExtensionFunction.
 
     Feel free to call it from subclasses.
     """
-    if self.side == CommunicationSide.BOB:
+    if side == CommunicationSide.BOB:
       extended_keys = ExtendedKeys(
         send_encryption_key=extended_keys.recv_encryption_key,
         recv_encryption_key=extended_keys.send_encryption_key,
@@ -168,7 +198,11 @@ class KeyExtensionFunction(object):
     return extended_keys
 
   @abc.abstractmethod
-  def extend_keys(self) -> ExtendedKeys:
+  def extend_keys(
+      self,
+      side: CommunicationSide,
+      session_key: bytes
+  ) -> ExtendedKeys:
     """
     Generate extended keys, given session key and communication side.
 
@@ -179,4 +213,24 @@ class KeyExtensionFunction(object):
         extended_keys = ...
         return self._swap_keys_for_bob(extended_keys)
     """
+    pass
+
+
+class SessionStateLoader(object, metaclass=abc.ABCMeta):
+
+  """
+  Thing that loads session state.
+
+  Session state may be persisted between program invocations,
+  so this encapsulates this process.
+
+  Default implementation
+
+  """
+
+  def create_session_state(
+      self,
+      configuration: ChannelConfiguration,
+      crypto_configuration: ChannelCryptoConfiguration,
+  ) -> SessionState:
     pass

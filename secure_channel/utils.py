@@ -13,4 +13,3 @@ def destroy_key(key: ExtendedKeys):
   """Zeroes all elements in key."""
   for elem in key:
     clear_buffer(elem)
-

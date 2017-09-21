@@ -1,22 +1,26 @@
 import base64
 
 import pytest
-from Crypto.Hash import SHA256
+from cryptography.hazmat.backends import default_backend
 
 from secure_channel import api
 from secure_channel import key_extension
 
+from cryptography.hazmat.primitives.hashes import SHA256, Hash
+
 
 @pytest.fixture()
 def alternate_session_key():
-  sha = SHA256.new()
+  sha = Hash(SHA256(), default_backend())
   sha.update(b'This sentence is false')
-  return sha.digest()
+  return sha.finalize()
 
 
 @pytest.fixture()
 def alice_alternate_keys(alternate_session_key):
-  return key_extension.DefaultKeyExtensionFunction(alternate_session_key, api.CommunicationSide.ALICE).extend_keys()
+  return key_extension.DefaultKeyExtensionFunction().extend_keys(
+    api.CommunicationSide.ALICE, alternate_session_key,
+  )
 
 
 def test_key_size(alice_keys):

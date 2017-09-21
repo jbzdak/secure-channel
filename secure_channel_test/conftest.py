@@ -1,24 +1,26 @@
+from cryptography.hazmat.backends import default_backend
 
 from secure_channel import key_extension, api
 
-import pytest
-from Crypto.Hash import SHA256
+from cryptography.hazmat.primitives.hashes import SHA256, Hash
 
+
+import pytest
 
 @pytest.fixture()
 def session_key():
-  sha = SHA256.new()
+  sha = Hash(SHA256(), default_backend())
   sha.update(b'I love python and cryptography')
   sha.update(b'However I\'m proficient in only one of the above')
-  return sha.digest()
+  return sha.finalize()
 
 
 @pytest.fixture()
 def alice_keys(session_key):
-  return key_extension.DefaultKeyExtensionFunction(session_key, api.CommunicationSide.ALICE).extend_keys()
+  return key_extension.DefaultKeyExtensionFunction().extend_keys(api.CommunicationSide.ALICE, session_key)
 
 
 @pytest.fixture()
 def bobs_keys(session_key):
-  return key_extension.DefaultKeyExtensionFunction(session_key, api.CommunicationSide.BOB).extend_keys()
+  return key_extension.DefaultKeyExtensionFunction().extend_keys(api.CommunicationSide.BOB, session_key)
 

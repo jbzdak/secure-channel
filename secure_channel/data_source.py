@@ -7,11 +7,24 @@ from . import exceptions
 
 class TestDataSource(DataSource):
 
-  def __init__(self, config: ChannelConfiguration, in_messages: typing.Sequence[Message], ):
+  def __init__(
+      self,
+      config: ChannelConfiguration,
+      in_messages: typing.Sequence[Message] = tuple()
+  ):
     super().__init__(config)
-    self.__in_messages = list(in_messages)
-    self.__in_messages.reverse()
+    self.in_messages = in_messages
     self.__out_messages = []
+
+  @property
+  def in_messages(self):
+    return self.__in_messages
+
+  @in_messages.setter
+  def in_messages(self, in_messages):
+    messages = list(in_messages)
+    messages.reverse()
+    self.__in_messages = messages
 
   @property
   def out_messages(self):
