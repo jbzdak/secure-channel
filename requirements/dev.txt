@@ -21,6 +21,7 @@ pep8==1.7.0
 pip-tools==1.9.0
 py==1.4.33                # via pytest
 pycparser==2.18
+pycryptodome==3.4.7
 pyenchant==1.6.8
 pylint-common==0.2.5
 pylint-plugin-utils==0.2.6  # via pylint-common

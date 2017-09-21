@@ -43,3 +43,8 @@ class InvalidSignature(BaseException):
   """
   A signature is invalid
   """
+
+class CounterOverflowError(BaseException):
+  """
+  A counter has overflown.
+  """

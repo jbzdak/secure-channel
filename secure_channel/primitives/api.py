@@ -1,51 +1,52 @@
 
+
+
 import abc
 import enum
 import typing
 
 DataBuffer = typing.Union[bytearray, memoryview]
 
+class Direction(enum.Enum):
 
-class HashFunction(object, metaclass=abc.ABCMeta):
+  ENCRYPT = 1
+  DECRYPT = 2
 
-  @property
+
+class HMAC(object, metaclass=abc.ABCMeta):
+
   @abc.abstractmethod
-  def digest_size(self):
-    raise NotImplemented
-
-  @abc.abstractmethod
-  def update(self, data_buffer):
+  def update(self, data: bytearray):
     raise NotImplemented
 
   @abc.abstractmethod
   def finalize(self) -> bytearray:
     raise NotImplemented
 
-
-class BlockCipher(object, metaclass=abc.ABCMeta):
-
-  @property
-  def key_size_bytes(self):
-    raise NotImplemented
-
-  @property
-  def name(self):
-    raise NotImplemented
-
-  @property
-  def block_size_bytes(self):
+  @abc.abstractmethod
+  def verify(self, signature: bytearray):
     raise NotImplemented
 
 
-class BlockCipherMode(object, metaclass=abc.ABCMeta):
+class CipherMode(object, metaclass=abc.ABCMeta):
+  """This one works in-place."""
 
-  def initialize(
+  @abc.abstractmethod
+  def update(self, data: DataBuffer) -> bytearray:
+    raise NotImplemented
+
+
+class Backend(object):
+
+  @abc.abstractmethod
+  def create_hmac(self, key: bytearray, hash: str) -> HMAC:
+    raise NotImplemented
+
+  @abc.abstractmethod
+  def create_cipher_mode(
       self,
-      block_cipher: BlockCipher,
       key: bytearray,
-      iv: bytearray
+      iv: bytearray,
+      cipher: bytearray,
   ):
     raise NotImplemented
-
-  def update(self, databytearray):
-

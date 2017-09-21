@@ -69,7 +69,7 @@ class SecureChannel(object):
   ):
     assert message_id < self.config.max_messages_in_session
 
-    TODO: intentonaly broken syntax so I read this next time I
+    # TODO: intentonaly broken syntax so I read this next time I
 
     # So here is the problem: I don't want to use canned CTR mode
     # of cryptography as security of the whole scheme depends on
@@ -92,7 +92,7 @@ class SecureChannel(object):
     return hmac.finalize()
 
   def encrypt(self, data: api.DataBuffer, signature: api.DataBuffer) -> api.DataBuffer:
-
+    pass
 
   def verify(self, data: api.DataBuffer, signature: api.DataBuffer):
     hmac = self.__create_hmac()

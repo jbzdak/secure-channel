@@ -3,11 +3,18 @@ import abc
 import enum
 import threading
 import typing
+import hmac
 
 from cryptography.hazmat.primitives.hashes import HashAlgorithm
 from cryptography.hazmat.primitives.ciphers.algorithms import CipherAlgorithm
 
 DataBuffer = typing.Union[bytearray, memoryview]
+
+
+class CryptoBackend(enum.Enum):
+
+  PYCRYPTO = 1
+  CRYPTOGRAPHY = 2
 
 
 ExtendedKeys = typing.NamedTuple(
@@ -28,8 +35,8 @@ ChannelCryptoConfiguration = typing.NamedTuple(
     # 32 bit int. If you touch anything beloow
     ("protocol_version", int),
     ("session_key_length_bytes", int),
-    ("block_cipher", CipherAlgorithm),
-    ("hash_algo", HashAlgorithm),
+    ("block_cipher", str),
+    ("hash_algo", str),
   )
 )
 """

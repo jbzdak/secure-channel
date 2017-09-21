@@ -9,4 +9,5 @@ cffi==1.11.0              # via cryptography
 cryptography==2.0.3
 idna==2.6                 # via cryptography
 pycparser==2.18           # via cffi
+pycryptodome==3.4.7
 six==1.11.0               # via cryptography
