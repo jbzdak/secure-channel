@@ -8,45 +8,65 @@ import typing
 DataBuffer = typing.Union[bytearray, memoryview]
 
 class Direction(enum.Enum):
+  """
+  Signifies whether we encrypt or decrypt.
+  """
 
   ENCRYPT = 1
   DECRYPT = 2
 
 
 class HMAC(object, metaclass=abc.ABCMeta):
+  """Initialized hmac function."""
 
   @abc.abstractmethod
-  def update(self, data: bytearray):
-    raise NotImplemented
+  def update(self, data: bytearray) -> None:
+    """Updates hmac object with data."""
+    raise NotImplementedError
 
   @abc.abstractmethod
   def finalize(self) -> bytearray:
-    raise NotImplemented
+    """Returns computed hmac."""
+    raise NotImplementedError
 
   @abc.abstractmethod
   def verify(self, signature: bytearray):
-    raise NotImplemented
+    """
+    Checks current hash input with given signature.
+    Uses constant time compare so we don't leak timing info.
+    """
+    raise NotImplementedError
 
 
 class CipherMode(object, metaclass=abc.ABCMeta):
-  """This one works in-place."""
+  """
+  Initialized cipher mode.
+  """
 
   @abc.abstractmethod
   def update(self, data: DataBuffer) -> bytearray:
-    raise NotImplemented
+    """
+    Encrypt or decrypt the data.
+    :param data: Data buffer to encrypt, encryption might be done in place.
+    :return: Encrypted or decrypted data. Despite that this might modify
+             data buffer
+    """
+
+    raise NotImplementedError
 
 
 class Backend(object):
 
   @abc.abstractmethod
   def create_hmac(self, key: bytearray, hash: str) -> HMAC:
-    raise NotImplemented
+    raise NotImplementedError
 
   @abc.abstractmethod
   def create_cipher_mode(
       self,
       key: bytearray,
-      iv: bytearray,
-      cipher: bytearray,
+      ctr: int,
+      cipher: str,
+      direction: Direction,
   ):
-    raise NotImplemented
+    raise NotImplementedError

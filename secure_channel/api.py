@@ -133,7 +133,7 @@ class DataSource(object, metaclass=abc.ABCMeta):
 
     This call is blocking. It will either write whole buffer or raise an exception.
     """
-    raise NotImplemented()
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def read(self) -> Message:
@@ -144,7 +144,7 @@ class DataSource(object, metaclass=abc.ABCMeta):
 
     :return: number of bytes read. This is always a multiple of self.block_size
     """
-    raise NotImplemented()
+    raise NotImplementedError()
 
 
 class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
@@ -168,7 +168,7 @@ class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
     :param configuration: Channel configuration.
 
     """
-    raise NotImplemented
+    raise NotImplementedError
 
 
 class KeyExtensionFunction(object):

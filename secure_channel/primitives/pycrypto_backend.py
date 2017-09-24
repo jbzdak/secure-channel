@@ -1,15 +1,17 @@
 
 import struct
+from ctypes import ARRAY
 
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256, HMAC
+from Crypto.Util import Counter
 
 from .. import exceptions
 from . import api
 from .utils import constant_time_compare
 
 
-__LONG_LONG_MAX = 2 ** (8 * 8)
+__LONG_LONG_MAX = 2 ** (8 * 8) - 1
 
 
 def format_counter(counter: int):
@@ -44,31 +46,64 @@ class PyCryptoCipherMode(api.CipherMode):
       self,
       cipher,
       message_id:int,
-      key: bytearray
+      key: bytearray,
+      direction: api.Direction,
+      raw_nonce=None
   ):
     self.cipher = cipher
+    self.direction = direction
+
+    if raw_nonce is not None:
+      ctr = Counter.new(
+        128,
+        initial_value=int.from_bytes(raw_nonce, byteorder='big', signed=False)
+      )
+    else:
+      ctr = Counter.new(
+        64,
+        prefix=format_counter(message_id),
+        initial_value=0
+      )
+
+    if isinstance(key, bytearray):
+      # TODO: ensure keys can be securely removed from memory.
+      key = bytes(key)
+
     self.mode = cipher.new(
       key=key,
       mode=self.cipher.MODE_CTR,
-      noonce=format_counter(message_id)
+      counter=ctr
     )
 
   def update(self, data: api.DataBuffer) -> bytearray:
     assert len(data) % self.cipher.block_size == 0
 
-    if not isinstance(data, bytearray):
-      data = bytearray(data)
+    if not isinstance(data, bytes):
+      data = bytes(data)
 
-    return super().update(data)
+    if self.direction == api.Direction.ENCRYPT:
+      response = self.mode.encrypt(data)
+    else:
+      response = self.mode.decrypt(data)
 
-
-
+    return response
 
 class PycryptoBackend(api.Backend):
-  def create_cipher_mode(self, key: bytearray, iv: bytearray, cipher: bytearray):
-    return super().create_cipher_mode(key, iv, cipher)
+
+  def create_cipher_mode(
+      self,
+      key: bytearray,
+      ctr: int,
+      cipher: str,
+      direction: api.Direction
+  ):
+    assert cipher == "AES"
+    assert len(key) == (256 / 8)
+
+    return PyCryptoCipherMode(
+      cipher=AES, message_id=ctr, key=key, direction=direction)
 
   def create_hmac(self, key: bytearray, hash: str) -> HMAC:
     assert hash == "SHA-256"
+    return PyCryptoHMAC(SHA256, key)
 
-    return super().create_hmac(key, hash)

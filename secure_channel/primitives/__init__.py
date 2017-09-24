@@ -23,3 +23,9 @@ My issues with ``cryptography`` package:
   there is explicit request to zero memory we use, and bytes
   can't be zeroed.
 """
+
+from .api import Direction, CipherMode, HMAC, Backend, DataBuffer
+
+from .pycrypto_backend import PycryptoBackend
+
+BACKEND = PycryptoBackend()
