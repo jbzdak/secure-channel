@@ -1,23 +1,11 @@
 
-import struct
-from ctypes import ARRAY
-
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256, HMAC
-from Crypto.Util import Counter
+from Crypto.Util import Counter, Padding
 
 from .. import exceptions
 from . import api
-from .utils import constant_time_compare
-
-
-__LONG_LONG_MAX = 2 ** (8 * 8) - 1
-
-
-def format_counter(counter: int):
-  if counter > __LONG_LONG_MAX:
-    raise exceptions.CounterOverflowError()
-  return struct.pack(">Q", counter)
+from .utils import constant_time_compare, format_counter
 
 
 class PyCryptoHMAC(api.HMAC):
@@ -87,6 +75,18 @@ class PyCryptoCipherMode(api.CipherMode):
       response = self.mode.decrypt(data)
 
     return response
+
+  @property
+  def block_size_bytes(self) -> int:
+    return AES.block_size
+
+  def pad(self, data) -> bytearray:
+    return Padding.pad(data, self.block_size_bytes)
+
+  def unpad(self, data) -> bytearray:
+    return Padding.unpad(data, self.block_size_bytes)
+
+
 
 class PycryptoBackend(api.Backend):
 

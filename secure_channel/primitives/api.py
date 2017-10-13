@@ -1,9 +1,8 @@
-
-
-
 import abc
 import enum
 import typing
+
+
 
 DataBuffer = typing.Union[bytearray, memoryview]
 
@@ -43,6 +42,8 @@ class CipherMode(object, metaclass=abc.ABCMeta):
   Initialized cipher mode.
   """
 
+  # TODO: Add api to clear state of cipher mode
+
   @abc.abstractmethod
   def update(self, data: DataBuffer) -> bytearray:
     """
@@ -52,6 +53,14 @@ class CipherMode(object, metaclass=abc.ABCMeta):
              data buffer
     """
 
+    raise NotImplementedError
+
+  @abc.abstractmethod
+  def pad(self, data) -> bytearray:
+    raise NotImplementedError
+
+  @abc.abstractmethod
+  def unpad(self, data) -> bytearray:
     raise NotImplementedError
 
 

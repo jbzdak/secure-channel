@@ -82,15 +82,53 @@ class ConfigurationAware(object):
 class SessionState(ConfigurationAware):
 
   def get_send_message_number(self) -> int:
+    """
+    Get new message id and bump internal state
+    to so next call will return greater number.
+    """
     pass
 
   def verify_recv_message_number(self, message_number: int):
+    """
+
+    Raise an error when message number is out of order.
+
+    Current implementations allow gaps in message ids as they
+    allow some interesting implementation features.
+
+    .. note::
+
+      Why allow gaps in message ids.
+
+      One possible usage of this (or similar) application would be to
+      securely (for once) communicate with remote embedded devices,
+      that are not powerfull enough to have full HTTPS implementation
+      (or a TCP stack even).
+
+      In case of this devices session key negotiation is not an option,
+      (but we know that session key will not run out of message_id) ---
+      however these devices might not update every sent message id to
+      persistent storage could kill their flash memory. So we store
+      persitently every, let's say 100 message sent, and on boot up
+      increment sent message_id by, let's say, 1000.
+
+    .. note::
+
+      This needs to be called **after**  hmac is verified,
+      otherwise attacker might be able to update
+      stored message number
+
+    :param message_number:
+    :return:
+    """
     pass
 
   def get_extended_keys(self) -> ExtendedKeys:
+    """Return extended keys, you may cache instances of this."""
     pass
 
   def reset(self):
+    """Destroy state of this instance."""
     pass
 
 
@@ -105,10 +143,15 @@ class CommunicationSide(enum.Enum):
 
 class Message(object, metaclass=abc.ABCMeta):
 
-  def __init__(self, message_id: int, data: DataBuffer, protocol_version: int):
+  def __init__(
+      self,
+      message_id: int,
+      data: DataBuffer,
+      hmac: DataBuffer
+  ):
     self.message_id = message_id
-    self.protocol_version = protocol_version
     self.data = data
+    self.hmac = hmac
 
 
 class DataSource(object, metaclass=abc.ABCMeta):
