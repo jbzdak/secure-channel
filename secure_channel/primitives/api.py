@@ -77,5 +77,5 @@ class Backend(object):
       ctr: int,
       cipher: str,
       direction: Direction,
-  ):
+  ) -> CipherMode:
     raise NotImplementedError

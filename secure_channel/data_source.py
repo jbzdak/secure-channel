@@ -17,8 +17,8 @@ class TestDataSource(DataSource):
     self.__out_messages = []
 
   @property
-  def in_messages(self):
-    return self.__in_messages
+  def in_messages(self) -> list:
+    return list(reversed(self.__in_messages))
 
   @in_messages.setter
   def in_messages(self, in_messages):

@@ -111,3 +111,19 @@ def test_encryption_and_decryption(pycrypto_ciphers, random_data_for_tests):
   ciphertext = encrypt.update(plaintext)
   decrypted = decrypt.update(ciphertext)
   assert decrypted == plaintext
+
+
+def test_cipher_block_size(pycrypto_ciphers):
+  encrypt, decrypt = pycrypto_ciphers
+  assert encrypt.block_size_bytes == 16
+
+
+def test_pad(pycrypto_ciphers):
+  encrypt, decrypt = pycrypto_ciphers
+  assert len(encrypt.pad(b'1234')) == encrypt.block_size_bytes
+  assert encrypt.pad(b'1234') == b'1234\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c'
+
+
+def test_unpad(pycrypto_ciphers):
+  encrypt, decrypt = pycrypto_ciphers
+  assert encrypt.unpad(encrypt.pad(b'1234')) == b'1234'

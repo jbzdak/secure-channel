@@ -141,17 +141,14 @@ class CommunicationSide(enum.Enum):
   BOB = 2
 
 
-class Message(object, metaclass=abc.ABCMeta):
-
-  def __init__(
-      self,
-      message_id: int,
-      data: DataBuffer,
-      hmac: DataBuffer
-  ):
-    self.message_id = message_id
-    self.data = data
-    self.hmac = hmac
+Message = typing.NamedTuple(
+  "Message",
+  (
+    ("message_id", int),
+    ("data", DataBuffer),
+    ("hmac", DataBuffer),
+  ),
+)
 
 
 class DataSource(object, metaclass=abc.ABCMeta):
