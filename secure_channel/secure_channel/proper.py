@@ -21,7 +21,7 @@ class SecureChannel(object):
       key_generator: api.SessionKeyNegotiator,
       *,
       crypto_configration: api.ChannelCryptoConfiguration = utils.CRYPTO_CONFIGURATION,
-      configuration: api.ChannelConfiguration = api.DEFAULT_CONFIGURATION,
+      configuration: api.ChannelConfiguration = api.DEFAULT_CONFIGURATION
   ):
     self._data_source = data_source
     self._configuration = configuration
