@@ -12,7 +12,7 @@ class SecureChannel(object):
   @property
   def block_size_bytes(self):
     """Returns block size in bytes for this channel."""
-    assert utils.CRYPTO_CONFIGURATION.hash_algo == "AES"
+    assert utils.CRYPTO_CONFIGURATION.block_cipher == "AES"
     return 16
 
   def __init__(

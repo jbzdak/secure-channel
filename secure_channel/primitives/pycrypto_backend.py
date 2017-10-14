@@ -13,7 +13,7 @@ class PyCryptoHMAC(api.HMAC):
   """HMAC."""
   def __init__(self, digestmod, key: bytearray):
     self.hmac = HMAC.HMAC(
-      key=key,
+      key=bytes(key),  # TODO: Storing key as bytes.
       digestmod=digestmod
     )
 
@@ -127,7 +127,3 @@ class PycryptoBackend(api.Backend):
   def create_hash(self, hash_func: str) -> PyCryptoHash:
     assert hash_func == "SHA-256"
     return PyCryptoHash(SHA256.new())
-
-
-
-

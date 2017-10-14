@@ -4,16 +4,15 @@
 import base64
 
 import pytest
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.hashes import SHA256, Hash
 
 from secure_channel import api
 from secure_channel import key_extension
+from secure_channel.primitives import BACKEND
 
 
 @pytest.fixture()
 def alternate_session_key():
-  sha = Hash(SHA256(), default_backend())
+  sha = BACKEND.create_hash("SHA-256")
   sha.update(b'This sentence is false')
   return sha.finalize()
 

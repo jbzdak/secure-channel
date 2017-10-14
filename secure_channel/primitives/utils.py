@@ -10,8 +10,8 @@ def constant_time_compare(left: bytearray, right: bytearray) -> bool:
   Constant time compare.
   """
 
-  assert isinstance(left, bytearray)
-  assert isinstance(right, bytearray)
+  assert isinstance(left, (bytearray, bytes))
+  assert isinstance(right, (bytearray, bytes))
 
   if len(left) != len(right):
     return False

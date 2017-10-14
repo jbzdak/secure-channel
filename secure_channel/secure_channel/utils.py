@@ -16,7 +16,7 @@ from secure_channel import api
 from secure_channel.primitives import BACKEND, HMAC, Direction
 from secure_channel.primitives.utils import format_counter
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
   from .proper import SecureChannel  # pylint: disable=unused-import
 
 
@@ -49,17 +49,23 @@ class SecureChannelUtils(object):
     self.channel = channel
 
   def _update_hmac_with_crypto_details(self, hmac: HMAC):
-    serialized_details = pickle.dumps(CryptoDetailsSerializedForm(self.channel.crypto_config))
+    serialized_details = pickle.dumps(
+      CryptoDetailsSerializedForm(self.channel._crypto_config)
+    )
     hmac.update(format_counter(len(serialized_details)))
     hmac.update(serialized_details)
 
   def _get_data_hmac(self, message_id, data, key) -> HMAC:
-    hmac = BACKEND.create_hmac(key, self.channel.crypto_config.hash_algo)
+    hmac = BACKEND.create_hmac(key, self.channel._crypto_config.hash_algo)
     hmac.update(format_counter(message_id))
     self._update_hmac_with_crypto_details(hmac)
     hmac.update(format_counter(len(data)))
     hmac.update(data)
     return hmac
+
+  @property
+  def _extended_keys(self):
+    return self.channel._session_state.get_extended_keys()
 
 
 class SendMessageUtils(SecureChannelUtils):
@@ -79,15 +85,15 @@ class SendMessageUtils(SecureChannelUtils):
       message_id: int,
       data: api.DataBuffer
   ) -> bytearray:
-    key = self.channel.extended_keys.send_sign_key
+    key = self._extended_keys.send_sign_key
     hmac = self._get_data_hmac(message_id, data, key)
     return hmac.finalize()
 
   def _encrypt_message(self, message_id, data, hmac):
     cipher = BACKEND.create_cipher_mode(
-      key=self.channel.extended_keys.send_encryption_key,
+      key=self._extended_keys.send_encryption_key,
       ctr=message_id,
-      cipher=self.channel.crypto_config.block_cipher,
+      cipher=self.channel._crypto_config.block_cipher,
       direction=Direction.ENCRYPT
     )
 
@@ -105,32 +111,33 @@ class RecvMessageUtils(SecureChannelUtils):
   def recv_message(self) -> api.Message:
     """Receives the message synchronously, verifies and decrypts the message."""
     message = self.channel._data_source.read()
-    self._decrypt_and_verify_message_in_place(message)
-    return message
+    return self._decrypt_and_verify_message(message)
 
   def _verify_message_id(self, message: api.Message):
     self.channel._session_state.verify_recv_message_number(message.message_id)
 
-  def _decrypt_message_in_place(self, message):
+  def _decrypt_message(self, message: api.Message):
     cipher = BACKEND.create_cipher_mode(
-      key=self.channel.extended_keys.send_encryption_key,
+      key=self._extended_keys.recv_encryption_key,
       ctr=message.message_id,
-      cipher=self.channel.crypto_config.block_cipher,
+      cipher=self.channel._crypto_config.block_cipher,
       direction=Direction.DECRYPT
     )
 
-    decrypted_data = cipher.update(message.data)
-    decrypted_hmac = cipher.update(message.hmac)
-    message.data, message.hmac = decrypted_data, decrypted_hmac
+    return message._replace(
+      data=cipher.update(message.data),
+      hmac=cipher.unpad(cipher.update(message.hmac))
+    )
 
   def _verify_message_hmac(self, message: api.Message):
-    key = self.channel.extended_keys.recv_sign_key
+    key = self._extended_keys.recv_sign_key
     hmac = self._get_data_hmac(message.message_id, message.data, key)
     hmac.verify(message.hmac)
 
-  def _decrypt_and_verify_message_in_place(self, message):
-    self._decrypt_message_in_place(message)
+  def _decrypt_and_verify_message(self, message):
+    message = self._decrypt_message(message)
     self._verify_message_hmac(message)
     # Note: this needs to be called after we verified the hmac
     self._verify_message_id(message)
+    return message
 

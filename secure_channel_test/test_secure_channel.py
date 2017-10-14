@@ -25,9 +25,3 @@ def channel(channel_source, key_generator):
     key_generator=key_generator
   )
 
-#
-# def test_sign_and_verify(channel: secure_channel.SecureChannel):
-#   test_message = os.urandom(channel.crypto_configuration.hash_algo.block_size)
-#   signature = channel.sign(test_message)
-#   channel.verify(test_message, signature)
-

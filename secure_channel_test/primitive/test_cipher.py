@@ -1,7 +1,6 @@
 # pylint: disable=missing-docstring, redefined-outer-name, invalid-name
 
 import os
-from random import SystemRandom
 
 import pytest
 
@@ -82,13 +81,6 @@ def random_message_id(srandom, request):
       bytearray.fromhex("ffffffff"), byteorder='big', signed=False
     )
   return srandom.randint(1, 4294967296 - 1)
-
-
-@pytest.fixture(params=range(100))
-def random_data_for_tests(srandom: SystemRandom):
-  block_count = srandom.randint(1, 1024)
-  data_size = block_count * 32
-  return os.urandom(data_size)
 
 
 @pytest.fixture()

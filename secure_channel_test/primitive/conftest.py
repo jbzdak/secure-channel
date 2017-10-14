@@ -1,6 +1,5 @@
 # pylint: disable=missing-docstring, redefined-outer-name, invalid-name
 
-from random import SystemRandom
 
 import pytest
 
@@ -10,8 +9,4 @@ def pycrypto_backend():
   from secure_channel.primitives import pycrypto_backend
   return pycrypto_backend.PycryptoBackend()
 
-
-@pytest.fixture(scope="module")
-def srandom():
-  return SystemRandom()
 

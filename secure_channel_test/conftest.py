@@ -1,15 +1,16 @@
 # pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+import os
+from random import SystemRandom
 
 import pytest
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.hashes import SHA256, Hash
 
 from secure_channel import key_extension, api
+from secure_channel.primitives import BACKEND
 
 
 @pytest.fixture()
 def session_key():
-  sha = Hash(SHA256(), default_backend())
+  sha = BACKEND.create_hash("SHA-256")
   sha.update(b'I love python and cryptography')
   sha.update(b'However I\'m proficient in only one of the above')
   return sha.finalize()
@@ -27,3 +28,14 @@ def bobs_keys(session_key):
     api.CommunicationSide.BOB, session_key
   )
 
+
+@pytest.fixture(scope="session")
+def srandom():
+  return SystemRandom()
+
+
+@pytest.fixture(params=range(100), scope="session")
+def random_data_for_tests(srandom: SystemRandom):
+  block_count = srandom.randint(1, 1024)
+  data_size = block_count * 32
+  return os.urandom(data_size)
