@@ -1,15 +1,10 @@
+"""API classes."""
 
 import abc
 import enum
 import typing
 
 DataBuffer = typing.Union[bytearray, memoryview]
-
-
-class CryptoBackend(enum.Enum):
-
-  PYCRYPTO = 1
-  CRYPTOGRAPHY = 2
 
 
 ExtendedKeys = typing.NamedTuple(
@@ -27,7 +22,7 @@ ChannelCryptoConfiguration = typing.NamedTuple(
   "ChannelCryptoConfiguration",
   (
     # Right now protocol version will be identified by single
-    # 32 bit int. If you touch anything beloow
+    # 32 bit int. If you touch anything below bump protocol version.
     ("protocol_version", int),
     ("session_key_length_bytes", int),
     ("block_cipher", str),
@@ -35,7 +30,7 @@ ChannelCryptoConfiguration = typing.NamedTuple(
   )
 )
 """
-This is crypto configuration, please don't touch it. 
+This is crypto configuration, please don't touch it.
 """
 
 ChannelConfiguration = typing.NamedTuple(
@@ -48,41 +43,52 @@ ChannelConfiguration = typing.NamedTuple(
   )
 )
 """
-Things in this tuple may be changed by end user, and they 
-probably won't compromise security. 
+Things in this tuple may be changed by end user, and they
+probably won't compromise security.
 """
 
 DEFAULT_CONFIGURATION = ChannelConfiguration(
-  # We limit max message size to 256 mb, as messages are stored in memory twice.
+  # We limit max message size to 256 MB, as messages are stored in memory twice.
   # They need to be stored in memory due to requirement of releasing plaintext
   # out of encryption function only after plaintext is verified.
   # I could store messages on disk, but hey it's a toy project
   max_message_size_bytes=268435456,
   # Full 32 byte counter
-  max_messages_in_session=4294967296-1, # TODO: Validte it fits in long
+  max_messages_in_session=4294967296-1, # TODO: Validate it fits in long
 )
 """Feel free to change these."""
 
 
-class ConfigurationAware(object):
+class _ConfigurationAware(object):
 
+  """Object aware of configuration and supporting read-only access to it."""
   def __init__(self, configuration: ChannelConfiguration):
     self.__configuration = configuration
 
   @property
   def configuration(self):
+    """Read-only property."""
     return self.__configuration
 
 
-class SessionState(ConfigurationAware):
+class SessionState(_ConfigurationAware, metaclass=abc.ABCMeta):
 
+  """Object responsible for maintaining session state, that is:
+
+  1. Generating message numbers for sent messages
+  2. Verifying message numbers for received messages.
+
+  """
+
+  @abc.abstractmethod
   def get_send_message_number(self) -> int:
     """
     Get new message id and bump internal state
     to so next call will return greater number.
     """
-    pass
+    raise NotImplementedError
 
+  @abc.abstractmethod
   def verify_recv_message_number(self, message_number: int):
     """
 
@@ -97,14 +103,14 @@ class SessionState(ConfigurationAware):
 
       One possible usage of this (or similar) application would be to
       securely (for once) communicate with remote embedded devices,
-      that are not powerfull enough to have full HTTPS implementation
+      that are not powerful enough to have full HTTPS implementation
       (or a TCP stack even).
 
       In case of this devices session key negotiation is not an option,
       (but we know that session key will not run out of message_id) ---
       however these devices might not update every sent message id to
       persistent storage could kill their flash memory. So we store
-      persitently every, let's say 100 message sent, and on boot up
+      persistently every, let's say 100 message sent, and on boot up
       increment sent message_id by, let's say, 1000.
 
     .. note::
@@ -116,20 +122,23 @@ class SessionState(ConfigurationAware):
     :param message_number:
     :return:
     """
-    pass
+    raise NotImplementedError
 
+  @abc.abstractmethod
   def get_extended_keys(self) -> ExtendedKeys:
     """Return extended keys, you may cache instances of this."""
-    pass
+    raise NotImplementedError
 
+  @abc.abstractmethod
   def reset(self):
     """Destroy state of this instance."""
-    pass
+    raise NotImplementedError
 
 
 class CommunicationSide(enum.Enum):
   """
-  Represents side of communication, to establish secure channel one side **must** set this to ALICE and other to BOB.
+  Represents side of communication, to establish secure channel one side
+  **must** set this to ALICE and other to BOB.
   """
 
   ALICE = 1
@@ -146,20 +155,11 @@ Message = typing.NamedTuple(
 )
 
 
-class DataSource(object, metaclass=abc.ABCMeta):
+class DataSource(_ConfigurationAware, metaclass=abc.ABCMeta):
 
   """
   Implements a two-way data source.
   """
-
-  def __init__(self, config: ChannelConfiguration) -> None:
-    super().__init__()
-    self.__config = config
-
-  @property
-  def config(self):
-    return self.__config
-
 
   @abc.abstractmethod
   def write(self, message: Message):
@@ -182,7 +182,9 @@ class DataSource(object, metaclass=abc.ABCMeta):
     raise NotImplementedError()
 
 
-class SessionKeyNegotiator(object,  metaclass=abc.ABCMeta):
+class SessionKeyNegotiator(object, metaclass=abc.ABCMeta):
+
+  """Negotiates session keys."""
 
   def create_session_state(
       self,
@@ -214,19 +216,20 @@ class KeyExtensionFunction(object):
   It takes a session key and communication side,
   and securely produces for keys for encryption and authentication.
 
-  It is not used explicitly through the api, however most of the
+  It is not used explicitly through the API, however most of the
   implementations of SessionState will use such generator
   implicitly.
   """
 
+  @classmethod
   def _swap_keys_for_bob(
-      self,
+      cls,
       side: CommunicationSide,
       extended_keys: ExtendedKeys,
   ) -> ExtendedKeys:
     """
-    Helper that swaps send and recv keys if side is bob. You need to call it in your implementation of
-    KeyExtensionFunction.
+    Helper that swaps send and recv keys if side is bob. You need to call
+    it in your implementation of KeyExtensionFunction.
 
     Feel free to call it from subclasses.
     """
@@ -255,7 +258,7 @@ class KeyExtensionFunction(object):
         extended_keys = ...
         return self._swap_keys_for_bob(extended_keys)
     """
-    pass
+    raise NotImplementedError
 
 
 class SessionStateLoader(object, metaclass=abc.ABCMeta):
@@ -266,13 +269,13 @@ class SessionStateLoader(object, metaclass=abc.ABCMeta):
   Session state may be persisted between program invocations,
   so this encapsulates this process.
 
-  Default implementation
-
   """
 
+  @abc.abstractmethod
   def create_session_state(
       self,
       configuration: ChannelConfiguration,
       crypto_configuration: ChannelCryptoConfiguration,
   ) -> SessionState:
-    pass
+    """Load session state."""
+    raise NotImplementedError

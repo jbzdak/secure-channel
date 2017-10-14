@@ -62,3 +62,10 @@ enumfield
 overriden
 javascript
 dict
+
+hmac
+pycrypto
+plaintext
+TCP
+MB
+recv

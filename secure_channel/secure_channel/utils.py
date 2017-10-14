@@ -1,3 +1,14 @@
+"""
+Utility classes for SecureChannel.
+
+These utility classes are used to hide implementation details of SecureChannel
+from end-user. Basically SecureChannel has now two functions: send_message
+and receive_message.
+
+"""
+
+# pylint: disable=protected-access
+
 import pickle
 import typing
 
@@ -6,7 +17,7 @@ from secure_channel.primitives import BACKEND, HMAC, Direction
 from secure_channel.primitives.utils import format_counter
 
 if typing.TYPE_CHECKING:
-  from .proper import SecureChannel
+  from .proper import SecureChannel  # pylint: disable=unused-import
 
 
 CRYPTO_CONFIGURATION = api.ChannelCryptoConfiguration(
@@ -18,6 +29,10 @@ CRYPTO_CONFIGURATION = api.ChannelCryptoConfiguration(
 
 
 class CryptoDetailsSerializedForm(object):
+  """
+  Utility class used to serialize named tuple along with field
+  names and types.
+  """
 
   def __init__(self, crypto_configuration: api.ChannelCryptoConfiguration):
     self.field_names = crypto_configuration._fields
@@ -27,7 +42,7 @@ class CryptoDetailsSerializedForm(object):
 
 class SecureChannelUtils(object):
   """
-  Helper class that encrypts/decrypts single message, keeping some state.
+  Base class for helpers.
   """
 
   def __init__(self, channel: "SecureChannel"):
@@ -47,14 +62,18 @@ class SecureChannelUtils(object):
     return hmac
 
 class SendMessageUtils(SecureChannelUtils):
+  """
+  Helper to send the message.
+  """
 
   def send_message(self, data: api.DataBuffer):
+    """Sends the message synchronously."""
     message_id = self.channel._session_state.get_send_message_number()
-    hmac = self.get_sent_message_hmac(message_id, data)
-    message = self.encrypt_message(message_id, data, hmac)
+    hmac = self._get_sent_message_hmac(message_id, data)
+    message = self._encrypt_message(message_id, data, hmac)
     self.channel._data_source.write(message)
 
-  def get_sent_message_hmac(
+  def _get_sent_message_hmac(
       self,
       message_id: int,
       data: api.DataBuffer
@@ -63,7 +82,7 @@ class SendMessageUtils(SecureChannelUtils):
     hmac = self._get_data_hmac(message_id, data, key)
     return hmac.finalize()
 
-  def encrypt_message(self, message_id, data, hmac):
+  def _encrypt_message(self, message_id, data, hmac):
     cipher = BACKEND.create_cipher_mode(
       key=self.channel.extended_keys.send_encryption_key,
       ctr=message_id,
@@ -79,10 +98,19 @@ class SendMessageUtils(SecureChannelUtils):
 
 
 class RecvMessageUtils(SecureChannelUtils):
-  def verify_message_id(self, message: api.Message):
+
+  """Helper to receive the message."""
+
+  def recv_message(self) -> api.Message:
+    """Receives the message synchronously, verifies and decrypts the message."""
+    message = self.channel._data_source.read()
+    self._decrypt_and_verify_message_in_place(message)
+    return message
+
+  def _verify_message_id(self, message: api.Message):
     self.channel._session_state.verify_recv_message_number(message.message_id)
 
-  def decrypt_message_in_place(self, message):
+  def _decrypt_message_in_place(self, message):
     cipher = BACKEND.create_cipher_mode(
       key=self.channel.extended_keys.send_encryption_key,
       ctr=message.message_id,
@@ -94,19 +122,14 @@ class RecvMessageUtils(SecureChannelUtils):
     decrypted_hmac = cipher.update(message.hmac)
     message.data, message.hmac = decrypted_data, decrypted_hmac
 
-  def verify_message_hmac(self, message: api.Message):
+  def _verify_message_hmac(self, message: api.Message):
     key = self.channel.extended_keys.recv_sign_key
     hmac = self._get_data_hmac(message.message_id, message.data, key)
     hmac.verify(message.hmac)
 
-  def decrypt_message_and_verify_message_in_place(self, message):
-    self.decrypt_message_in_place(message)
-    self.verify_message_hmac(message)
+  def _decrypt_and_verify_message_in_place(self, message):
+    self._decrypt_message_in_place(message)
+    self._verify_message_hmac(message)
     # Note: this needs to be called after we verified the hmac
-    self.verify_message_id(message)
-
-  def recv_message(self) -> api.Message:
-    message = self.channel._data_source.read()
-    self.decrypt_message_and_verify_message_in_place(message)
-    return message
+    self._verify_message_id(message)
 

@@ -1,9 +1,14 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
 
 import os
 
 import pytest
 
 from secure_channel.primitives.utils import constant_time_compare
+
+
+
+# pylint: disable=invalid-name
 
 
 @pytest.fixture(params=list(range(100)))

@@ -1,5 +1,14 @@
-from .api import SessionKeyNegotiator, DataSource, KeyExtensionFunction, CommunicationSide, SessionState, \
+"""Implementation of key negotiation."""
+
+from .api import (
+  SessionKeyNegotiator,
+  DataSource,
+  KeyExtensionFunction, \
+  CommunicationSide,
+  SessionState, \
   ChannelConfiguration
+)
+
 from .key_extension import DefaultKeyExtensionFunction
 from .session_state import DefaultSessionState
 
@@ -30,13 +39,3 @@ class TestSessionKeyNegotiator(SessionKeyNegotiator):
       configuration,
       self.kef.extend_keys(self.side, bytearray(self.key)),
     )
-
-
-
-
-
-
-
-
-
-

@@ -1,24 +1,24 @@
-
+"""Utility classes."""
 
 import struct
 
 from secure_channel import exceptions
 
 
-def constant_time_compare(a: bytearray, b: bytearray) -> bool:
+def constant_time_compare(left: bytearray, right: bytearray) -> bool:
   """
   Constant time compare.
   """
 
-  assert isinstance(a, bytearray)
-  assert isinstance(b, bytearray)
+  assert isinstance(left, bytearray)
+  assert isinstance(right, bytearray)
 
-  if len(a) != len(b):
+  if len(left) != len(right):
     return False
 
-  result = [None] * len(a)
-  for ii, (ea, eb) in enumerate(zip(a, b)):
-    result[ii] = int(ea ^ eb)
+  result = bytearray(len(right))
+  for ii, (left_elem, right_elem) in enumerate(zip(left, right)):
+    result[ii] = int(left_elem ^ right_elem)
 
   return sum(result) == 0
 
@@ -26,7 +26,8 @@ def constant_time_compare(a: bytearray, b: bytearray) -> bool:
 __LONG_LONG_MAX = 2 ** (8 * 8) - 1
 
 
-def format_counter(counter: int):
+def format_counter(counter: int) -> bytes:
+  """Formats int counter to long long bytes"""
   if counter > __LONG_LONG_MAX:
     raise exceptions.CounterOverflowError()
   return struct.pack(">Q", counter)

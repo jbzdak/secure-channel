@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+
 import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.hashes import SHA256, Hash
@@ -15,10 +17,14 @@ def session_key():
 
 @pytest.fixture()
 def alice_keys(session_key):
-  return key_extension.DefaultKeyExtensionFunction().extend_keys(api.CommunicationSide.ALICE, session_key)
+  return key_extension.DefaultKeyExtensionFunction().extend_keys(
+    api.CommunicationSide.ALICE, session_key)
+
 
 
 @pytest.fixture()
 def bobs_keys(session_key):
-  return key_extension.DefaultKeyExtensionFunction().extend_keys(api.CommunicationSide.BOB, session_key)
+  return key_extension.DefaultKeyExtensionFunction().extend_keys(
+    api.CommunicationSide.BOB, session_key
+  )
 

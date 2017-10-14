@@ -1,3 +1,4 @@
+"""Pycrypto implementation of backend."""
 
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256, HMAC
@@ -9,7 +10,7 @@ from .. import exceptions
 
 
 class PyCryptoHMAC(api.HMAC):
-
+  """HMAC."""
   def __init__(self, digestmod, key: bytearray):
     self.hmac = HMAC.HMAC(
       key=key,
@@ -28,12 +29,26 @@ class PyCryptoHMAC(api.HMAC):
     return bytearray(self.hmac.digest())
 
 
-class PyCryptoCipherMode(api.CipherMode):
+class PyCryptoHash(api.HashFunction):
 
+  """Wrapper for pycrypto hash."""
+
+  def __init__(self, hash_func):
+    self.hash_func = hash_func
+
+  def finalize(self) -> bytearray:
+    return self.hash_func.digest()
+
+  def update(self, data: bytearray) -> None:
+    self.hash_func.update(data)
+
+
+class PyCryptoCipherMode(api.CipherMode):
+  """Pycrypto CTR mode."""
   def __init__(
       self,
       cipher,
-      message_id:int,
+      message_id: int,
       key: bytearray,
       direction: api.Direction,
       raw_nonce=None
@@ -78,6 +93,7 @@ class PyCryptoCipherMode(api.CipherMode):
 
   @property
   def block_size_bytes(self) -> int:
+    """Returns block size of underlying cipher."""
     return AES.block_size
 
   def pad(self, data) -> bytearray:
@@ -89,6 +105,8 @@ class PyCryptoCipherMode(api.CipherMode):
 
 
 class PycryptoBackend(api.Backend):
+
+  """Pycrypto backend."""
 
   def create_cipher_mode(
       self,
@@ -103,7 +121,14 @@ class PycryptoBackend(api.Backend):
     return PyCryptoCipherMode(
       cipher=AES, message_id=ctr, key=key, direction=direction)
 
-  def create_hmac(self, key: bytearray, hash: str) -> HMAC:
-    assert hash == "SHA-256"
+  def create_hmac(self, key: bytearray, hash_func: str) -> HMAC:
+    assert hash_func == "SHA-256"
     return PyCryptoHMAC(SHA256, key)
+
+  def create_hash(self, hash_func: str) -> PyCryptoHash:
+    assert hash_func == "SHA-256"
+    return PyCryptoHash(SHA256.new())
+
+
+
 

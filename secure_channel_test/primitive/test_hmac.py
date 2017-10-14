@@ -1,3 +1,4 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
 
 import hashlib
 import hmac
@@ -42,7 +43,7 @@ def pure_python_hmac(hmac_key):
 @pytest.fixture()
 def pycrypto_hmac(hmac_key, pycrypto_backend):
   def hmac_impl(message):
-    hmac = pycrypto_backend.create_hmac(key=hmac_key, hash="SHA-256")
+    hmac = pycrypto_backend.create_hmac(key=hmac_key, hash_func="SHA-256")
     hmac.update(message)
     return hmac.finalize()
   return hmac_impl
@@ -51,7 +52,7 @@ def pycrypto_hmac(hmac_key, pycrypto_backend):
 @pytest.fixture()
 def pycrypto_hmac_verifier(hmac_key, pycrypto_backend):
   def hmac_impl(message, signature):
-    hmac = pycrypto_backend.create_hmac(key=hmac_key, hash="SHA-256")
+    hmac = pycrypto_backend.create_hmac(key=hmac_key, hash_func="SHA-256")
     hmac.update(message)
     assert hmac.verify(signature) is None
   return hmac_impl
@@ -67,12 +68,20 @@ def test_pycrypto_hmac(fixed_message, fixed_message_hash, pycrypto_hmac):
   assert fixed_message_hash == pycrypto_hmac(fixed_message)
 
 
-def test_pycrypto_hmac_verifier(fixed_message, fixed_message_hash, pycrypto_hmac_verifier):
+def test_pycrypto_hmac_verifier(
+    fixed_message,
+    fixed_message_hash,
+    pycrypto_hmac_verifier
+):
   """Test pycrypto verifier"""
   pycrypto_hmac_verifier(fixed_message, fixed_message_hash)
 
 
-def test_pycrypto_hmac_verifier_negative(fixed_message, fixed_message_invalid_hash, pycrypto_hmac_verifier):
+def test_pycrypto_hmac_verifier_negative(
+    fixed_message,
+    fixed_message_invalid_hash,
+    pycrypto_hmac_verifier
+):
   """Test pycrypto verifier raises on invalid hash"""
   with pytest.raises(InvalidSignature):
     pycrypto_hmac_verifier(fixed_message, fixed_message_invalid_hash)

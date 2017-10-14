@@ -1,3 +1,5 @@
+"""API classes for primitives library."""
+
 import abc
 import enum
 import typing
@@ -15,8 +17,8 @@ class Direction(enum.Enum):
   DECRYPT = 2
 
 
-class HMAC(object, metaclass=abc.ABCMeta):
-  """Initialized hmac function."""
+class HashFunction(object, metaclass=abc.ABCMeta):
+  """A hash function."""
 
   @abc.abstractmethod
   def update(self, data: bytearray) -> None:
@@ -27,6 +29,10 @@ class HMAC(object, metaclass=abc.ABCMeta):
   def finalize(self) -> bytearray:
     """Returns computed hmac."""
     raise NotImplementedError
+
+
+class HMAC(HashFunction, metaclass=abc.ABCMeta):
+  """Initialized hmac function."""
 
   @abc.abstractmethod
   def verify(self, signature: bytearray):
@@ -42,7 +48,7 @@ class CipherMode(object, metaclass=abc.ABCMeta):
   Initialized cipher mode.
   """
 
-  # TODO: Add api to clear state of cipher mode
+  # TODO: Add API to clear state of cipher mode
 
   @abc.abstractmethod
   def update(self, data: DataBuffer) -> bytearray:
@@ -57,17 +63,30 @@ class CipherMode(object, metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
   def pad(self, data) -> bytearray:
+    """Pads data to block size."""
     raise NotImplementedError
 
   @abc.abstractmethod
   def unpad(self, data) -> bytearray:
+    """Removes padding from data."""
     raise NotImplementedError
 
 
 class Backend(object):
 
+  """
+  Backend instance, that is static and used to create
+  hmac and cipher instances.
+  """
+
   @abc.abstractmethod
-  def create_hmac(self, key: bytearray, hash: str) -> HMAC:
+  def create_hash(self, hash_func: str) -> HashFunction:
+    """Create hash function"""
+    raise NotImplementedError
+
+  @abc.abstractmethod
+  def create_hmac(self, key: bytearray, hash_func: str) -> HMAC:
+    """Create initialized instance of hmac."""
     raise NotImplementedError
 
   @abc.abstractmethod
@@ -78,4 +97,5 @@ class Backend(object):
       cipher: str,
       direction: Direction,
   ) -> CipherMode:
+    """Create initialized instance of Cipher Mode."""
     raise NotImplementedError

@@ -1,3 +1,6 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+
+
 import base64
 
 import pytest
@@ -37,10 +40,14 @@ def test_keys_swapped(alice_keys: api.ExtendedKeys, bobs_keys: api.ExtendedKeys)
 def test_expected_values(alice_keys: api.ExtendedKeys):
   # Test for expected values, these shouldn't change.
   # They were generated on my computer.
-  assert base64.b64encode(alice_keys.send_sign_key) == b'glqgVpNp2pj0/gkvjVnGdUG1A/QipO25ex1HAsG3s3w='
-  assert base64.b64encode(alice_keys.send_encryption_key) == b'e8/yw2pIRJm6s60Cg96vMo/ph03NM3WsXRmIQO5E5cA='
-  assert base64.b64encode(alice_keys.recv_encryption_key) == b'XoVzhPAJDnhSl4922Z14vDLEAa/230tsWsMJ2iKjkG4='
-  assert base64.b64encode(alice_keys.send_encryption_key) == b'e8/yw2pIRJm6s60Cg96vMo/ph03NM3WsXRmIQO5E5cA='
+  assert base64.b64encode(alice_keys.send_sign_key) \
+         == b'glqgVpNp2pj0/gkvjVnGdUG1A/QipO25ex1HAsG3s3w='
+  assert base64.b64encode(alice_keys.send_encryption_key) \
+         == b'e8/yw2pIRJm6s60Cg96vMo/ph03NM3WsXRmIQO5E5cA='
+  assert base64.b64encode(alice_keys.recv_encryption_key) \
+         == b'XoVzhPAJDnhSl4922Z14vDLEAa/230tsWsMJ2iKjkG4='
+  assert base64.b64encode(alice_keys.send_encryption_key) \
+         == b'e8/yw2pIRJm6s60Cg96vMo/ph03NM3WsXRmIQO5E5cA='
 
 
 def test_different_session_keys_generate_different_extended_keys(alice_keys, alice_alternate_keys):

@@ -1,3 +1,5 @@
+"""Session state implementation."""
+
 import threading
 
 from . import exceptions, utils
@@ -5,6 +7,9 @@ from .api import SessionState, ChannelConfiguration, ExtendedKeys
 
 
 class DefaultSessionState(SessionState):
+  """Default session state with non-persistent session ids."""
+
+
   def __init__(
       self,
       configuration: ChannelConfiguration,
@@ -25,7 +30,7 @@ class DefaultSessionState(SessionState):
   def get_send_message_number(self):
     with self.__lock:
       self.__assert_ready()
-      self.__send_message_number+=1
+      self.__send_message_number += 1
       if self.__send_message_number >= self.configuration.max_messages_in_session:
         raise exceptions.NeedToRenegotiateKey()
       return self.__send_message_number

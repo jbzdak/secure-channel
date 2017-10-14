@@ -1,7 +1,7 @@
+"""Exception classes."""
 
 
-
-class BaseException(Exception):
+class BaseCryptoException(Exception):
   """
   Base exception class.
 
@@ -22,7 +22,7 @@ class AlreadyReseted(FatalException):
 
 
 
-class NotEnoughDataInInput(BaseException):
+class NotEnoughDataInInput(BaseCryptoException):
   """
   Thrown when there is not enough data in input stream we are reading from.
   """
@@ -30,21 +30,23 @@ class NotEnoughDataInInput(BaseException):
 
 class RecvMessageOutOfSequence(FatalException):
   """
-  Thrown when received message id is less or equal to last received message number
+  Thrown when received message id is less or equal to last received
+  message number
   """
 
-class NeedToRenegotiateKey(BaseException):
+class NeedToRenegotiateKey(BaseCryptoException):
   """
-  Thrown when you need to renegotiate key, due to using up all messages in session.
+  Thrown when you need to renegotiate key, due to using up all messages
+  in session.
   """
 
 
-class InvalidSignature(BaseException):
+class InvalidSignature(BaseCryptoException):
   """
   A signature is invalid
   """
 
-class CounterOverflowError(BaseException):
+class CounterOverflowError(BaseCryptoException):
   """
   A counter has overflown.
   """

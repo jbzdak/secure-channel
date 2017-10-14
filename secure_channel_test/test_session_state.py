@@ -1,4 +1,5 @@
-
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+# pylint: disable=protected-access
 import pytest
 
 from secure_channel import session_state as session_state_module, api, exceptions

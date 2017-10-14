@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+
 from random import SystemRandom
 
 import pytest

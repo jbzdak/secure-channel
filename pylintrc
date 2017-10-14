@@ -83,6 +83,8 @@ disable=
      # sometime if you can remove this and build passes
      invalid-sequence-index,
 
+     trailing-whitespace,
+
      # Not very helpful,cyclic imports when handled properly are not a problem.
      cyclic-import
 
@@ -172,7 +174,7 @@ contextmanager-decorators=contextlib.contextmanager
 spelling-dict=en_US
 
 # List of comma separated words that should not be checked.
-spelling-ignore-words=OK,API,CSS,UI,HTML,TODO,URLS,URL,DRF,AU,SS,AB,FK,utf,pre,xhr
+spelling-ignore-words=OK,API,CSS,UI,HTML,TODO,URLS,URL,TCP,MB
 
 # A path to a file that contains private dictionary; one word per line.
 spelling-private-dict-file=.spell-words

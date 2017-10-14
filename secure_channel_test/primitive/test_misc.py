@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
+
 import pytest
 
 from secure_channel.exceptions import CounterOverflowError

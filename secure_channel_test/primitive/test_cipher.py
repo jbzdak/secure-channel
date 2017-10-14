@@ -1,4 +1,4 @@
-
+# pylint: disable=missing-docstring, redefined-outer-name, invalid-name
 
 import os
 from random import SystemRandom
@@ -90,8 +90,8 @@ def random_data_for_tests(srandom: SystemRandom):
 @pytest.fixture()
 def pycrypto_ciphers(pycrypto_backend: Backend, random_key, random_message_id):
   encrypt = pycrypto_backend.create_cipher_mode(
-    key = random_key,
-    ctr = random_message_id,
+    key=random_key,
+    ctr=random_message_id,
     cipher="AES",
     direction=Direction.ENCRYPT
   )
@@ -114,16 +114,16 @@ def test_encryption_and_decryption(pycrypto_ciphers, random_data_for_tests):
 
 
 def test_cipher_block_size(pycrypto_ciphers):
-  encrypt, decrypt = pycrypto_ciphers
+  encrypt, __ = pycrypto_ciphers
   assert encrypt.block_size_bytes == 16
 
 
 def test_pad(pycrypto_ciphers):
-  encrypt, decrypt = pycrypto_ciphers
+  encrypt, __ = pycrypto_ciphers
   assert len(encrypt.pad(b'1234')) == encrypt.block_size_bytes
   assert encrypt.pad(b'1234') == b'1234\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c'
 
 
 def test_unpad(pycrypto_ciphers):
-  encrypt, decrypt = pycrypto_ciphers
+  encrypt, __ = pycrypto_ciphers
   assert encrypt.unpad(encrypt.pad(b'1234')) == b'1234'
