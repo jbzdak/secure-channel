@@ -15,6 +15,7 @@ def fixed_key():
     "1f352c073b6108d72d9810a30914dff4"
   )
 
+
 @pytest.fixture()
 def init_counter():
   return bytearray.fromhex(
@@ -71,13 +72,16 @@ def test_fixed_string_decryption(pycrypto_fixed_strings_cipher, plaintext, ciphe
 def random_key():
   return os.urandom(32)
 
+
 @pytest.fixture(params=range(10))
 def random_message_id(srandom, request):
   if request.param == 0:
     return 0
   if request.param == 1:
-    return int.from_bytes(bytearray.fromhex("ffffffff"), byteorder='big', signed=False)
-  return srandom.randint(1, 4294967296-1)
+    return int.from_bytes(
+      bytearray.fromhex("ffffffff"), byteorder='big', signed=False
+    )
+  return srandom.randint(1, 4294967296 - 1)
 
 
 @pytest.fixture(params=range(100))

@@ -13,6 +13,7 @@ from secure_channel.exceptions import InvalidSignature
 def hmac_key():
   return b"example key"
 
+
 @pytest.fixture()
 def fixed_message():
   return b"Attack at NORTH at DAWN."

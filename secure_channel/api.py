@@ -54,7 +54,7 @@ DEFAULT_CONFIGURATION = ChannelConfiguration(
   # I could store messages on disk, but hey it's a toy project
   max_message_size_bytes=268435456,
   # Full 32 byte counter
-  max_messages_in_session=4294967296-1, # TODO: Validate it fits in long
+  max_messages_in_session=4294967296 - 1,  # TODO: Validate it fits in long
 )
 """Feel free to change these."""
 

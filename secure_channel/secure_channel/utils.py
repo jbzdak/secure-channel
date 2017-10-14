@@ -61,6 +61,7 @@ class SecureChannelUtils(object):
     hmac.update(data)
     return hmac
 
+
 class SendMessageUtils(SecureChannelUtils):
   """
   Helper to send the message.

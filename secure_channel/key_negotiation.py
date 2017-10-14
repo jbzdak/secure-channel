@@ -3,9 +3,9 @@
 from .api import (
   SessionKeyNegotiator,
   DataSource,
-  KeyExtensionFunction, \
+  KeyExtensionFunction,
   CommunicationSide,
-  SessionState, \
+  SessionState,
   ChannelConfiguration
 )
 

@@ -21,7 +21,6 @@ def alice_keys(session_key):
     api.CommunicationSide.ALICE, session_key)
 
 
-
 @pytest.fixture()
 def bobs_keys(session_key):
   return key_extension.DefaultKeyExtensionFunction().extend_keys(

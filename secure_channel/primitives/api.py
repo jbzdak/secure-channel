@@ -5,8 +5,8 @@ import enum
 import typing
 
 
-
 DataBuffer = typing.Union[bytearray, memoryview]
+
 
 class Direction(enum.Enum):
   """

@@ -9,7 +9,6 @@ from .api import SessionState, ChannelConfiguration, ExtendedKeys
 class DefaultSessionState(SessionState):
   """Default session state with non-persistent session ids."""
 
-
   def __init__(
       self,
       configuration: ChannelConfiguration,

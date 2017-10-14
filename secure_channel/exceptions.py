@@ -21,7 +21,6 @@ class AlreadyReseted(FatalException):
   """
 
 
-
 class NotEnoughDataInInput(BaseCryptoException):
   """
   Thrown when there is not enough data in input stream we are reading from.
@@ -34,6 +33,7 @@ class RecvMessageOutOfSequence(FatalException):
   message number
   """
 
+
 class NeedToRenegotiateKey(BaseCryptoException):
   """
   Thrown when you need to renegotiate key, due to using up all messages
@@ -45,6 +45,7 @@ class InvalidSignature(BaseCryptoException):
   """
   A signature is invalid
   """
+
 
 class CounterOverflowError(BaseCryptoException):
   """

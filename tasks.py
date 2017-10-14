@@ -18,7 +18,7 @@ def test(ctx):
   ctx.run("py.test -v --cov secure_channel --cov-report=html --cov-report=term-missing secure_channel_test")
 
 
-@task(pre=[test, pep8, lint])
+@task(pre=[pep8, lint, test])
 def check(ctx):
   pass
 

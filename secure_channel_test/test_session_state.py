@@ -18,6 +18,7 @@ def session_state(alice_keys):
 def test_extended_keys(alice_keys, session_state):
   assert session_state.get_extended_keys() is alice_keys
 
+
 def test_session_reset(session_state: api.SessionState):
   session_state.reset()
   with pytest.raises(exceptions.AlreadyReseted):
@@ -35,10 +36,10 @@ def test_session_can_reset_twice(session_state: api.SessionState):
 
 def test_session_reset_resets(session_state: api.SessionState):
   session_state.reset()
-  assert session_state._DefaultSessionState__send_message_number \
-         == session_state.configuration.max_messages_in_session
-  assert session_state._DefaultSessionState__recv_message_number \
-         == session_state.configuration.max_messages_in_session
+  send_msg_id = session_state._DefaultSessionState__send_message_number
+  assert send_msg_id == session_state.configuration.max_messages_in_session
+  recv_msg_id = session_state._DefaultSessionState__recv_message_number
+  assert recv_msg_id == session_state.configuration.max_messages_in_session
   assert session_state._DefaultSessionState__extended_keys is None
 
 
@@ -103,7 +104,7 @@ def test_verify_recv_mesage_number_invalid_sequence_2(session_state):
 
 def test_verify_recv_message_number_need_to_renegotiate_key(session_state):
   session_state.verify_recv_message_number(
-    session_state.configuration.max_messages_in_session-1
+    session_state.configuration.max_messages_in_session - 1
   )
   with pytest.raises(exceptions.NeedToRenegotiateKey):
     session_state.verify_recv_message_number(

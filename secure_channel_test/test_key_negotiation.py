@@ -12,6 +12,7 @@ def test_key_negotiator(session_key):
     api.CommunicationSide.ALICE
   )
 
+
 @pytest.fixture()
 def session_state(test_key_negotiator):
   return test_key_negotiator.create_session_state(None, api.DEFAULT_CONFIGURATION)

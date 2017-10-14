@@ -9,7 +9,7 @@ from secure_channel.primitives.example import ctr_plaintext, ctr_plaintext_short
 
 @pytest.fixture(params=list(range(100)))
 def random_ints_4_bytes(srandom: SystemRandom):
-  return srandom.getrandbits(4*8), srandom.getrandbits(4*8)
+  return srandom.getrandbits(4 * 8), srandom.getrandbits(4 * 8)
 
 
 def test_both_plaintexts_agree(random_ints_4_bytes):

@@ -103,7 +103,6 @@ class PyCryptoCipherMode(api.CipherMode):
     return Padding.unpad(data, self.block_size_bytes)
 
 
-
 class PycryptoBackend(api.Backend):
 
   """Pycrypto backend."""

@@ -40,7 +40,7 @@ class TestDataSource(DataSource):
   def read(self) -> Message:
     return self.__in_messages.pop()
 
-                                   # some kind of false-positive
+  #                                  some kind of false-positive
   def write(self, data: Message):  # pylint: disable=arguments-differ
     self.__out_messages.append(data)
 

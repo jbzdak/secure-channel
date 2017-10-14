@@ -3,6 +3,7 @@
 
 import struct
 
+
 LONG_LONG_MAX = 2 ** (8 * 8)
 
 
@@ -14,6 +15,7 @@ def ctr_plaintext(message_id, key_id):
 
 
 LONG_MAX = 2 ** (8 * 4)
+
 
 def ctr_plaintext_short(message_id, key_id):
   """

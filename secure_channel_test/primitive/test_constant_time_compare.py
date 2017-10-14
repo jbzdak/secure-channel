@@ -7,7 +7,6 @@ import pytest
 from secure_channel.primitives.utils import constant_time_compare
 
 
-
 # pylint: disable=invalid-name
 
 
