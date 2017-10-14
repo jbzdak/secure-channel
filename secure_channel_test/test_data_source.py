@@ -3,6 +3,7 @@ import pytest
 
 from secure_channel import api, data_source
 
+
 def test_data_source_config():
   sd = data_source.TestDataSource(api.DEFAULT_CONFIGURATION, [])
   assert sd.config is api.DEFAULT_CONFIGURATION

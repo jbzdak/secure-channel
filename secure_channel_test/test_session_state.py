@@ -3,6 +3,7 @@ import pytest
 
 from secure_channel import session_state as session_state_module, api, exceptions
 
+
 @pytest.fixture()
 def session_state(alice_keys):
   return session_state_module.DefaultSessionState(

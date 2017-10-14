@@ -1,8 +1,7 @@
 import threading
 
-from .api import SessionState, ConfigurationAware, ChannelConfiguration, DataBuffer, KeyExtensionFunction, ExtendedKeys
-
 from . import exceptions, utils
+from .api import SessionState, ChannelConfiguration, ExtendedKeys
 
 
 class DefaultSessionState(SessionState):

@@ -1,9 +1,8 @@
 
 import typing
 
-from . api import DataSource, DataBuffer, Message, ChannelConfiguration
+from .api import DataSource, Message, ChannelConfiguration
 
-from . import exceptions
 
 class TestDataSource(DataSource):
 

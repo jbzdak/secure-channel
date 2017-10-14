@@ -1,11 +1,9 @@
+import pytest
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.hashes import SHA256, Hash
 
 from secure_channel import key_extension, api
 
-from cryptography.hazmat.primitives.hashes import SHA256, Hash
-
-
-import pytest
 
 @pytest.fixture()
 def session_key():

@@ -1,9 +1,10 @@
 
-import pytest
-
 from random import SystemRandom
 
+import pytest
+
 from secure_channel.primitives.example import ctr_plaintext, ctr_plaintext_short
+
 
 @pytest.fixture(params=list(range(100)))
 def random_ints_4_bytes(srandom: SystemRandom):

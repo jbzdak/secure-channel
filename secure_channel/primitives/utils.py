@@ -4,6 +4,7 @@ import struct
 
 from secure_channel import exceptions
 
+
 def constant_time_compare(a: bytearray, b: bytearray) -> bool:
   """
   Constant time compare.

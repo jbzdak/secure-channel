@@ -1,8 +1,10 @@
 
 import os
+
 import pytest
 
 from secure_channel.primitives.utils import constant_time_compare
+
 
 @pytest.fixture(params=list(range(100)))
 def random_buffer(request):

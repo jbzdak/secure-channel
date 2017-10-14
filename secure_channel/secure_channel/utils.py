@@ -1,11 +1,9 @@
 import pickle
 import typing
 
+from secure_channel import api
+from secure_channel.primitives import BACKEND, HMAC, Direction
 from secure_channel.primitives.utils import format_counter
-from secure_channel import api, key_extension
-
-from secure_channel.primitives import BACKEND, CipherMode, HMAC, Direction
-
 
 if typing.TYPE_CHECKING:
   from .proper import SecureChannel

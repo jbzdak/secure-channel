@@ -1,10 +1,9 @@
 
 
+import pytest
+
 from secure_channel import data_source, secure_channel, api, key_negotiation
 
-import os
-
-import pytest
 
 @pytest.fixture()
 def channel_source():

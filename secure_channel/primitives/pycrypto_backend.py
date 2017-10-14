@@ -3,9 +3,9 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256, HMAC
 from Crypto.Util import Counter, Padding
 
-from .. import exceptions
 from . import api
 from .utils import constant_time_compare, format_counter
+from .. import exceptions
 
 
 class PyCryptoHMAC(api.HMAC):

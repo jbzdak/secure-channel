@@ -1,10 +1,11 @@
 
 
-import pytest
-
 import os
 
+import pytest
+
 from secure_channel import utils, key_extension, api
+
 
 @pytest.fixture(params=list(range(100)))
 def random_buffer(request):

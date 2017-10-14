@@ -1,7 +1,4 @@
-import pickle
-
-from secure_channel.primitives.utils import format_counter
-from secure_channel import api, key_extension
+from secure_channel import api
 
 from . import utils
 

@@ -2,7 +2,8 @@
 
 import pytest
 
-from secure_channel import key_negotiation, utils, api
+from secure_channel import key_negotiation, api
+
 
 @pytest.fixture()
 def test_key_negotiator(session_key):

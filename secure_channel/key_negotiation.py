@@ -1,8 +1,7 @@
-from . api import SessionKeyNegotiator, DataSource, KeyExtensionFunction, CommunicationSide, SessionState, ChannelConfiguration
-
+from .api import SessionKeyNegotiator, DataSource, KeyExtensionFunction, CommunicationSide, SessionState, \
+  ChannelConfiguration
+from .key_extension import DefaultKeyExtensionFunction
 from .session_state import DefaultSessionState
-
-from . key_extension import DefaultKeyExtensionFunction
 
 
 class TestSessionKeyNegotiator(SessionKeyNegotiator):

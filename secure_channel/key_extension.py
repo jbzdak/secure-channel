@@ -1,11 +1,8 @@
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.hashes import Hash
+from cryptography.hazmat.primitives.hashes import SHA256
 
 from .api import ExtendedKeys, KeyExtensionFunction, CommunicationSide, DataBuffer
-from .utils import clear_buffer
-
-
 
 
 class DefaultKeyExtensionFunction(KeyExtensionFunction):
